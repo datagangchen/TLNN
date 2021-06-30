@@ -4,6 +4,8 @@
 from statistics import mean
 import math
 import random
+
+WIGHT_THR  =0.3
 def signfunction(x,ispositive=True):
     if ispositive:
         return max(0,x)
@@ -38,12 +40,31 @@ class Always():
     def set_rho(self,rho):
         self.rho  = rho         
     def set_weight(self, weight):
-        self.w = weight
+        new_weight =[]
+
+        for weig in weight:
+            if weig <WIGHT_THR:
+                new_weight.append(0)
+            else:
+                new_weight.append(weig)
+        
+        self.w = new_weight
     def robustness(self, weight, rho):
  
         self.rho = rho 
-        self.w = weight
-        wrho = [w*r for w, r in zip(weight,rho)]
+
+        new_weight =[]
+
+        for weig in weight:
+            if weig <WIGHT_THR:
+                new_weight.append(0)
+            else:
+                new_weight.append(weig)
+
+        self.w = new_weight
+
+
+        wrho = [w*r for w, r in zip(new_weight,rho)]
 
         result = 1.0
 
@@ -129,14 +150,22 @@ class Always():
         return result
 
 class Eventually():
-    def __init__(self, weigth,  tau1,tau2):
+    def __init__(self, weight,  tau1,tau2):
         self.tau1 = tau1
         self.tau2 = tau2
         self.type = 'eventually'        
-        self.w =weigth 
+        self.w =weight 
         self.rho = None 
     def set_weight(self, weight):
-        self.w = weight
+        new_weight =[]
+
+        for weig in weight:
+            if weig <WIGHT_THR:
+                new_weight.append(0)
+            else:
+                new_weight.append(weig)
+        
+        self.w = new_weight
 
     def set_rho(self,rho):
         self.rho  = rho 
@@ -144,7 +173,19 @@ class Eventually():
     def robustness(self, weight, rho):
  
         self.rho = rho 
-        wrho = [w*r for w, r in zip(weight,rho)]
+
+        new_weight =[]
+
+        for weig in weight:
+            if weig <0.2:
+                new_weight.append(0)
+            else:
+                new_weight.append(weig)
+
+        self.w = new_weight
+
+
+        wrho = [w*r for w, r in zip(new_weight,rho)]
          
 
         result = 1.0
@@ -243,9 +284,15 @@ class AND():
         self.w = rew 
 
     def set_weight(self, weight):
-        self.w = weight
+        new_weight =[]
 
-
+        for weig in weight:
+            if weig <WIGHT_THR:
+                new_weight.append(0)
+            else:
+                new_weight.append(weig)
+        
+        self.w = new_weight
     def set_rho(self,rho):
         self.rho = rho 
 
@@ -321,7 +368,15 @@ class OR():
         self.w = rew 
 
     def set_weight(self, weight):
-        self.w = weight
+        new_weight =[]
+
+        for weig in weight:
+            if weig <0.2:
+                new_weight.append(0)
+            else:
+                new_weight.append(weig)
+        
+        self.w = new_weight
     def set_rho(self,rho):
         self.rho = rho 
 
@@ -956,7 +1011,7 @@ class TLNN():
         for i in range(H):
             out = self.output(x)
             
-            if out*yd<0:
+            if out*yd<=0:
                 new_topand_w, new_p, new_and_w, new_or_w, new_D_W_o, new_D_W_h, new_E_W_o, new_E_W_h = self.gradient_descent(eta, x, yd)
                 self.update_NN(x,new_topand_w, new_p, new_and_w, new_or_w, new_D_W_o, new_D_W_h, new_E_W_o, new_E_W_h)
             
@@ -994,14 +1049,16 @@ def show_result(tlnn):
     And2 = andor[0]
     formula_and =[]
     for form, w in zip(formula,And2.w):
+        if w>=WIGHT_THR:
 
-        formula_and.extend('('+"{:.2f}".format(w)+''.join(form)+')'+'AND')
+            formula_and.extend('('+"{:.2f}".format(w)+''.join(form)+')'+'AND')
 
     Or2 = andor[1]
     formula_or =[]
     for form, w in zip(formula, Or2.w):
+        if w>=WIGHT_THR:
  
-        formula_or.extend('('+"{:.2f}".format(w)+''.join(form)+')''OR')
+            formula_or.extend('('+"{:.2f}".format(w)+''.join(form)+')''OR')
 
 
 
