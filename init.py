@@ -1,6 +1,7 @@
-from modular import *
+from neuronetwork import *
 import random
 import numpy as np 
+from TLNetwork import *
 
 LENGTH_SIGNAL = 128
 NUM_D_HIDDEN = 5
@@ -11,14 +12,14 @@ def random_weight(lenght):
     weight = []
     for i in range(lenght):
         weight.append(random.uniform(0.0,1.0))
-    return weight
+    return np.array(weight)
 
 def generate_operator():
     opt =[4]
     tau0 =10
     chose = random.choice(opt)
     weight = random_weight(LENGTH_SIGNAL)
-    tau1 = random.randint(LENGTH_SIGNAL/4,LENGTH_SIGNAL/2)
+    tau1 = random.randint(LENGTH_SIGNAL/8,LENGTH_SIGNAL/4)
     tau2 = tau1+ random.randint(LENGTH_SIGNAL/4,LENGTH_SIGNAL/2)
     if chose ==1:
         return Always(weight,tau1,tau2)
@@ -76,3 +77,58 @@ def generate_atom():
     operator = generate_operator()
 
     return atomic_formula(encoder, decoder,operator)
+
+
+def show_result(tlnn):
+    predicates = tlnn.predicates
+    atomics = tlnn.atomics 
+    andor = tlnn.ANDOR
+    And = tlnn.And 
+
+    formula =[]
+    for pre, atoms in zip(predicates,atomics):
+        temp =[]
+        atom = atoms.operator
+        if atom.type =='alwayseventual':
+            temp.extend('G_[0,'+"{:.2f}".format(atom.tau0)+']'+'F_['+"{:.2f}".format(atom.tau1)+','+"{:.2f}".format(atom.tau2)+']')
+        elif atom.type =='eventualalways':
+            temp.extend('F_[0,'+"{:.2f}".format(atom.tau0)+']'+'G_['+"{:.2f}".format(atom.tau1)+','+"{:.2f}".format(atom.tau2)+']')
+        elif atom.type =='eventually':
+            temp.extend('F_['+"{:.2f}".format(atom.tau1)+','+"{:.2f}".format(atom.tau2)+']')
+        else:
+            temp.extend('G_['+"{:.2f}".format(atom.tau1)+','+"{:.2f}".format(atom.tau2)+']')
+        if pre.islarge:
+            temp.extend('(x>='+"{:.2f}".format(pre.constant)+')')
+        else:
+            temp.extend('(x<'+"{:.2f}".format(pre.constant)+')')
+
+        formula.append(temp)
+
+    And2 = andor[0]
+    formula_and =[]
+    for form, w in zip(formula,And2.w):
+        if w>=WIGHT_THR:
+
+            formula_and.extend('('+"{:.2f}".format(w)+''.join(form)+')'+'AND')
+
+    Or2 = andor[1]
+    formula_or =[]
+
+    for form, w in zip(formula, Or2.w):
+        if w>=WIGHT_THR:
+            formula_or.extend('('+"{:.2f}".format(w)+''.join(form)+')''OR')
+
+    if And.w[0]>=WIGHT_THR and And.w[1]>=WIGHT_THR:
+
+        results = "{:.2f}".format(And.w[0])+'('+''.join(formula_and)+')'+'AND'+"{:.2f}".format(And.w[1])+'('+''.join(formula_or)+')'
+    elif And.w[0]>=WIGHT_THR and And.w[1]<WIGHT_THR:
+        results = "{:.2f}".format(And.w[0])+'('+''.join(formula_and)+')'
+    elif And.w[0]<WIGHT_THR and And.w[1]>=WIGHT_THR:
+        results = "{:.2f}".format(And.w[1])+'('+''.join(formula_or)+')'
+    else:
+        results ='Not Found'
+
+    print results
+    
+
+

@@ -1,4 +1,5 @@
-from modular import *
+from  network import *
+from TLNetwork import *
 from init import *
 import random
 import numpy as np 
@@ -6,7 +7,7 @@ from load_data import *
 from statistics import mean
 import time
 
-Num_atom = 3
+Num_atom = 4
 
 predicates =[]
 atomics =[]
@@ -25,7 +26,7 @@ And  = and2
 
 tlnn = TLNN(predicates,atomics,ANDOR,And)
 
-signals,_,labels= load_data('matlab/TLNN_train_inner.mat')
+signals,_,labels= load_data('matlab/TLNN_train_norm.mat')
 
 
 
@@ -37,14 +38,15 @@ for i in range(1):
     time_cost =[]
     start_time = time.time()
     for i in range(20):
-        eta = math.exp(-0.1*i)*Num_atom
+        eta = math.exp(-0.6*i-0.3)
         loss =[]
         robust =[]
         data =  list(zip(signals,labels))
-        #random.shuffle(data)
+        random.shuffle(data)
+  
         for sig, label in data:
-            out = tlnn.output(sig)
-            tlnn.train(sig, label, eta, 1)
+            out = tlnn.output(np.array(sig))
+            tlnn.train(np.array(sig),np.array(label), eta, 1)
             loss.append(0.5*(out-label)**2)
             robust.append(out*label)
             txt = '---current output---', out*label, 'label', label,  'trainning step', i, 
