@@ -16,7 +16,7 @@ def random_weight(lenght):
 
 def generate_operator():
     opt =[4]
-    tau0 =10
+    tau0 =3
     chose = random.choice(opt)
     weight = random_weight(LENGTH_SIGNAL)
     tau1 = random.randint(LENGTH_SIGNAL/8,LENGTH_SIGNAL/4)
@@ -27,7 +27,7 @@ def generate_operator():
         return Eventually(weight,tau1,tau2)
 
     elif chose==3:
-        return EventualAlways(weight, 10, tau1,tau2)
+        return EventualAlways(weight,tau0, tau1,tau2)
 
     else:
         return AlwaysEventual(weight,tau0,tau1,tau2)
@@ -109,18 +109,28 @@ def show_result(tlnn):
     for form, w in zip(formula,And2.w):
         if w>=WIGHT_THR:
 
-            formula_and.extend('('+"{:.2f}".format(w)+''.join(form)+')'+'AND')
+            formula_and.extend('('+"{:.2f}".format(w)+''.join(form)+')'+' AND ')
+
+
+    formula_and.pop()
+    formula_and.pop()
+    formula_and.pop()
 
     Or2 = andor[1]
     formula_or =[]
 
     for form, w in zip(formula, Or2.w):
         if w>=WIGHT_THR:
-            formula_or.extend('('+"{:.2f}".format(w)+''.join(form)+')''OR')
+            formula_or.extend('('+"{:.2f}".format(w)+''.join(form)+')'+' OR ')
+
+    formula_or.pop()
+    formula_or.pop()
+
+    
 
     if And.w[0]>=WIGHT_THR and And.w[1]>=WIGHT_THR:
 
-        results = "{:.2f}".format(And.w[0])+'('+''.join(formula_and)+')'+'AND'+"{:.2f}".format(And.w[1])+'('+''.join(formula_or)+')'
+        results = "{:.2f}".format(And.w[0])+'('+''.join(formula_and)+')'+' AND '+"{:.2f}".format(And.w[1])+'('+''.join(formula_or)+')'
     elif And.w[0]>=WIGHT_THR and And.w[1]<WIGHT_THR:
         results = "{:.2f}".format(And.w[0])+'('+''.join(formula_and)+')'
     elif And.w[0]<WIGHT_THR and And.w[1]>=WIGHT_THR:

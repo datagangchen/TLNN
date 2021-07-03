@@ -7,7 +7,7 @@ from load_data import *
 from statistics import mean
 import time
 
-Num_atom = 4
+Num_atom = 3
 
 predicates =[]
 atomics =[]
@@ -37,8 +37,8 @@ for i in range(1):
     overall_robust =[]
     time_cost =[]
     start_time = time.time()
-    for i in range(20):
-        eta = math.exp(-0.6*i-0.3)
+    for i in range(100):
+        eta = math.exp(-0.1*i-0.3)
         loss =[]
         robust =[]
         data =  list(zip(signals,labels))

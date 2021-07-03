@@ -6,11 +6,11 @@ import math
 import random
 import numpy as np
 LENGTH_SIGNAL = 128
-WIGHT_THR  =0.25
+WIGHT_THR  =0.05
 
 def signfunction(x,ispositive=True):
     if ispositive:
-        return max(0,x)
+        return max(0.0,x)
     else:
         return -signfunction(-x,True)
         
@@ -25,12 +25,12 @@ def signfunction_w(x,rho, ispositive=True):
 
 vsignfunction_w = np.vectorize(signfunction_w)
 def Gaussian(x):
-    return math.exp(-x**2)
+    return x
 
 vGaussian = np.vectorize(Gaussian)
 
 def diff_Gaussian(x):
-    return -2*x*math.exp(-x**2)
+    return 1
 vdiff_Gaussian = np.vectorize(diff_Gaussian)
 def quant(x, length):
     #print 'output of encoder', x 
@@ -248,18 +248,22 @@ class AND():
         self.rho = rho 
 
     def output(self, weight, rho):
- 
-        new_weight =[]
-        for weig in weight:
-            if Gaussian(weig) <0.2:
-                new_weight.append(Gaussian(1))
-            else:
-                new_weight.append(Gaussian(weig))
 
-        alw = Always(np.array(new_weight), 0,rho.size-1)
+        #print weight.size, rho.size
+        '''
+         for i in range(weight.size):
+            if Gaussian(weight[i]) <WIGHT_THR:
+                weight[i]=0.0
+                rho[i] = 0.0       
+        
+        '''
+
+
+ 
+        alw = Always(weight, 0,rho.size-1)
         alw.set_rho(rho)
 
-        return alw.robustness(np.array(new_weight),rho)
+        return alw.robustness(weight,rho)
 
     def gradient_w(self):
 
@@ -312,15 +316,17 @@ class OR():
         self.type = 'or'
 
     def output(self, weight, rho):
-        new_weight =[]
-        for weig in weight:
-            if Gaussian(weig) <0.2:
-                new_weight.append(Gaussian(1))
-            else:
-                new_weight.append(Gaussian(weig))
+        '''
+        for i in range(weight.size):
+            if Gaussian(weight[i]) <WIGHT_THR:
+                weight[i]=0.0
+                rho[i] = 0.0        
+        '''
 
-        evn = Eventually(np.array(new_weight), 0, rho.size-1)
-        return evn.robustness(np.array(new_weight),rho)
+    
+        evn = Eventually(weight, 0, rho.size-1)
+        evn.set_rho(rho)
+        return evn.robustness(weight,rho)
 
 
     def set_weight(self, weight):

@@ -89,8 +89,8 @@ class TLNN():
 
         d_D_W_o =[]
         d_D_W_h =[]
-        d_D_W_o =[]
-        d_D_W_h =[]
+        d_E_W_o =[]
+        d_E_W_h =[]
         d_p =[]
 
         for ia in range(len(atomics)):
@@ -112,8 +112,7 @@ class TLNN():
 
             D_W_o = list(decoder.W_o)
             D_W_h = list(decoder.W_h)
-            d_D_W_o =[]
-            d_D_W_h =[]
+  
             temp =[]
             for i in range(len(D_W_o)):
                 grad = grad_r_atom[i]*decoder.gradient_o(i,decoder.h_out)
@@ -134,8 +133,7 @@ class TLNN():
 
             E_W_o = list(encoder.W_o)
             E_W_h = list(encoder.W_h)
-            d_E_W_o =[]
-            d_E_W_h =[]
+
 
             de_in =[]
             for j in range(len(D_W_h[0])):
@@ -176,9 +174,9 @@ class TLNN():
             pre.set_weight(pre.constant - eta*w)
 
         #print  'chenages ', d_p
-        #atomics = self.atomics 
+        atomics = self.atomics 
         rhoandor =[]
-        for atom, pre, dDo, dDh, dEo, dEh in zip(self.atomics,self.predicates,d_D_W_o,d_D_W_h,d_E_W_o,d_E_W_h ):
+        for atom, pre, dDo, dDh, dEo, dEh in zip(self.atomics,self.predicates, d_D_W_o, d_D_W_h, d_E_W_o,d_E_W_h):
             new_D_W_o = atom.decoder.W_o - eta*dDo
             new_D_W_h = atom.decoder.W_h - eta*dDh
             new_E_W_o = atom.encoder.W_o- eta*dEo
@@ -196,11 +194,13 @@ class TLNN():
             weight = atom.decoder.output(tau[0],tau[1])
 
             atom.operator.set_weight(weight)
+             
             rhoandor.append(atom.operator.robustness(weight,rho))
 
 
 
         toprho =[]
+
 
         for i in range(len(self.ANDOR)):
             if i==0:
